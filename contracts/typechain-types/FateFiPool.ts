@@ -26,27 +26,44 @@ import type {
 export interface FateFiPoolInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "CLAIM_WINDOW"
       | "admin"
       | "claim"
+      | "claimRefund"
       | "currentDay"
       | "days_"
       | "getDayInfo"
       | "getUserStake"
+      | "isDayRefundable"
       | "resolve"
       | "setAdmin"
       | "setStakeAmount"
       | "stake"
       | "stakeAmount"
       | "stakes"
-      | "withdrawUnclaimed"
+      | "sweepDust"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "Claimed" | "DayResolved" | "NewDay" | "Staked"
+    nameOrSignatureOrTopic:
+      | "Claimed"
+      | "DayRefundable"
+      | "DayResolved"
+      | "NewDay"
+      | "Refunded"
+      | "Staked"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "CLAIM_WINDOW",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "admin", values?: undefined): string;
   encodeFunctionData(functionFragment: "claim", values: [BigNumberish]): string;
+  encodeFunctionData(
+    functionFragment: "claimRefund",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "currentDay",
     values?: undefined
@@ -59,6 +76,10 @@ export interface FateFiPoolInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getUserStake",
     values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isDayRefundable",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "resolve",
@@ -82,17 +103,29 @@ export interface FateFiPoolInterface extends Interface {
     values: [BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "withdrawUnclaimed",
-    values: [BigNumberish]
+    functionFragment: "sweepDust",
+    values: [BigNumberish, BigNumberish]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "CLAIM_WINDOW",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "admin", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "claimRefund",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "currentDay", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "days_", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getDayInfo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getUserStake",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isDayRefundable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
@@ -107,10 +140,7 @@ export interface FateFiPoolInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "stakes", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "withdrawUnclaimed",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "sweepDust", data: BytesLike): Result;
 }
 
 export namespace ClaimedEvent {
@@ -124,6 +154,19 @@ export namespace ClaimedEvent {
     user: string;
     dayId: bigint;
     payout: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace DayRefundableEvent {
+  export type InputTuple = [dayId: BigNumberish, totalPool: BigNumberish];
+  export type OutputTuple = [dayId: bigint, totalPool: bigint];
+  export interface OutputObject {
+    dayId: bigint;
+    totalPool: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -161,6 +204,24 @@ export namespace NewDayEvent {
   export type OutputTuple = [dayId: bigint];
   export interface OutputObject {
     dayId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace RefundedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    dayId: BigNumberish,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [user: string, dayId: bigint, amount: bigint];
+  export interface OutputObject {
+    user: string;
+    dayId: bigint;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -236,20 +297,28 @@ export interface FateFiPool extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  CLAIM_WINDOW: TypedContractMethod<[], [bigint], "view">;
+
   admin: TypedContractMethod<[], [string], "view">;
 
   claim: TypedContractMethod<[dayId: BigNumberish], [void], "nonpayable">;
+
+  claimRefund: TypedContractMethod<[dayId: BigNumberish], [void], "nonpayable">;
 
   currentDay: TypedContractMethod<[], [bigint], "view">;
 
   days_: TypedContractMethod<
     [arg0: BigNumberish],
     [
-      [bigint, bigint, boolean, boolean] & {
+      [bigint, bigint, boolean, boolean, boolean, bigint, bigint, bigint] & {
         totalStaked: bigint;
         winningOption: bigint;
         resolved: boolean;
         exists: boolean;
+        refundable: boolean;
+        resolvedAt: bigint;
+        claimedCount: bigint;
+        totalClaimed: bigint;
       }
     ],
     "view"
@@ -287,6 +356,12 @@ export interface FateFiPool extends BaseContract {
     "view"
   >;
 
+  isDayRefundable: TypedContractMethod<
+    [dayId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
   resolve: TypedContractMethod<[winner: BigNumberish], [void], "nonpayable">;
 
   setAdmin: TypedContractMethod<[newAdmin: AddressLike], [void], "nonpayable">;
@@ -313,8 +388,8 @@ export interface FateFiPool extends BaseContract {
     "view"
   >;
 
-  withdrawUnclaimed: TypedContractMethod<
-    [amount: BigNumberish],
+  sweepDust: TypedContractMethod<
+    [dayId: BigNumberish, amount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -324,10 +399,16 @@ export interface FateFiPool extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "CLAIM_WINDOW"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "admin"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "claim"
+  ): TypedContractMethod<[dayId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "claimRefund"
   ): TypedContractMethod<[dayId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "currentDay"
@@ -337,11 +418,15 @@ export interface FateFiPool extends BaseContract {
   ): TypedContractMethod<
     [arg0: BigNumberish],
     [
-      [bigint, bigint, boolean, boolean] & {
+      [bigint, bigint, boolean, boolean, boolean, bigint, bigint, bigint] & {
         totalStaked: bigint;
         winningOption: bigint;
         resolved: boolean;
         exists: boolean;
+        refundable: boolean;
+        resolvedAt: bigint;
+        claimedCount: bigint;
+        totalClaimed: bigint;
       }
     ],
     "view"
@@ -381,6 +466,9 @@ export interface FateFiPool extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "isDayRefundable"
+  ): TypedContractMethod<[dayId: BigNumberish], [boolean], "view">;
+  getFunction(
     nameOrSignature: "resolve"
   ): TypedContractMethod<[winner: BigNumberish], [void], "nonpayable">;
   getFunction(
@@ -409,8 +497,12 @@ export interface FateFiPool extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "withdrawUnclaimed"
-  ): TypedContractMethod<[amount: BigNumberish], [void], "nonpayable">;
+    nameOrSignature: "sweepDust"
+  ): TypedContractMethod<
+    [dayId: BigNumberish, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   getEvent(
     key: "Claimed"
@@ -418,6 +510,13 @@ export interface FateFiPool extends BaseContract {
     ClaimedEvent.InputTuple,
     ClaimedEvent.OutputTuple,
     ClaimedEvent.OutputObject
+  >;
+  getEvent(
+    key: "DayRefundable"
+  ): TypedContractEvent<
+    DayRefundableEvent.InputTuple,
+    DayRefundableEvent.OutputTuple,
+    DayRefundableEvent.OutputObject
   >;
   getEvent(
     key: "DayResolved"
@@ -432,6 +531,13 @@ export interface FateFiPool extends BaseContract {
     NewDayEvent.InputTuple,
     NewDayEvent.OutputTuple,
     NewDayEvent.OutputObject
+  >;
+  getEvent(
+    key: "Refunded"
+  ): TypedContractEvent<
+    RefundedEvent.InputTuple,
+    RefundedEvent.OutputTuple,
+    RefundedEvent.OutputObject
   >;
   getEvent(
     key: "Staked"
@@ -451,6 +557,17 @@ export interface FateFiPool extends BaseContract {
       ClaimedEvent.InputTuple,
       ClaimedEvent.OutputTuple,
       ClaimedEvent.OutputObject
+    >;
+
+    "DayRefundable(uint256,uint256)": TypedContractEvent<
+      DayRefundableEvent.InputTuple,
+      DayRefundableEvent.OutputTuple,
+      DayRefundableEvent.OutputObject
+    >;
+    DayRefundable: TypedContractEvent<
+      DayRefundableEvent.InputTuple,
+      DayRefundableEvent.OutputTuple,
+      DayRefundableEvent.OutputObject
     >;
 
     "DayResolved(uint256,uint8,uint256,uint256)": TypedContractEvent<
@@ -473,6 +590,17 @@ export interface FateFiPool extends BaseContract {
       NewDayEvent.InputTuple,
       NewDayEvent.OutputTuple,
       NewDayEvent.OutputObject
+    >;
+
+    "Refunded(address,uint256,uint256)": TypedContractEvent<
+      RefundedEvent.InputTuple,
+      RefundedEvent.OutputTuple,
+      RefundedEvent.OutputObject
+    >;
+    Refunded: TypedContractEvent<
+      RefundedEvent.InputTuple,
+      RefundedEvent.OutputTuple,
+      RefundedEvent.OutputObject
     >;
 
     "Staked(address,uint256,uint8,uint256)": TypedContractEvent<

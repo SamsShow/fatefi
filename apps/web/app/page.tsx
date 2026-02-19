@@ -1,15 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Flame, Trophy, AlertTriangle, Layers } from "lucide-react";
+import { getSelectedNetwork, type UserNetwork } from "@/lib/staking";
 
 export default function Home() {
+  const [network, setNetwork] = useState<UserNetwork>('mainnet');
+
+  useEffect(() => {
+    const syncNetwork = () => setNetwork(getSelectedNetwork());
+    syncNetwork();
+    window.addEventListener('fatefi-network-changed', syncNetwork);
+    return () => window.removeEventListener('fatefi-network-changed', syncNetwork);
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Hero Section */}
       <section className="text-center py-20 md:py-32">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-[#0052FF]/20 mb-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-accent-purple/35 bg-gradient-to-r from-accent-purple/10 to-accent-gold/10 mainnet-badge-glow mb-8">
           <Layers size={14} className="text-[#0052FF]" />
-          <span className="text-sm font-medium text-foreground/80">Live on Base testnet</span>
+          <span className="text-sm font-medium text-foreground/80">Live on {network === 'mainnet' ? 'Base Mainnet' : 'Base Sepolia'}</span>
         </div>
         {/* Fanned card showcase */}
         <div className="relative w-64 h-48 mx-auto mb-10">

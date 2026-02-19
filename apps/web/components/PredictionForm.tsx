@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Activity, CheckCircle2, Lock, Loader2, Coins, ExternalLink } from 'lucide-react';
 import { submitPrediction } from '@/lib/api';
 import { isConnected } from '@/lib/wallet';
-import { stakeOnOption, STAKE_AMOUNT_ETH, POOL_CONTRACT_ADDRESS } from '@/lib/staking';
+import { stakeOnOption, STAKE_AMOUNT_ETH, getPoolContractAddress, getSelectedNetwork, getExplorerBaseUrl, type UserNetwork } from '@/lib/staking';
 
 interface PredictionFormProps {
     onSubmitted?: (prediction: any) => void;
@@ -41,7 +41,16 @@ export default function PredictionForm({ onSubmitted }: PredictionFormProps) {
     const [step, setStep] = useState<StakeStep>('idle');
     const [txHash, setTxHash] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const poolEnabled = !!POOL_CONTRACT_ADDRESS;
+    const [network, setNetwork] = useState<UserNetwork>('mainnet');
+
+    useEffect(() => {
+        const syncNetwork = () => setNetwork(getSelectedNetwork());
+        syncNetwork();
+        window.addEventListener('fatefi-network-changed', syncNetwork);
+        return () => window.removeEventListener('fatefi-network-changed', syncNetwork);
+    }, []);
+
+    const poolEnabled = !!getPoolContractAddress(network);
 
     const handleSubmit = async () => {
         if (!selected) return;
@@ -91,7 +100,7 @@ export default function PredictionForm({ onSubmitted }: PredictionFormProps) {
                 </p>
                 {txHash && (
                     <a
-                        href={`https://sepolia.basescan.org/tx/${txHash}`}
+                        href={`${getExplorerBaseUrl(network)}/tx/${txHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs text-accent-purple hover:underline"

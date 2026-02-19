@@ -6,17 +6,29 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Moon, Trophy, ScrollText, Wallet, LogOut } from 'lucide-react';
 import { signInWithWallet, disconnect, getStoredWallet, isConnected, shortenAddress } from '@/lib/wallet';
+import { getSelectedNetwork, setSelectedNetwork, type UserNetwork } from '@/lib/staking';
 
 export default function Navbar() {
     const pathname = usePathname();
     const [wallet, setWallet] = useState<string | null>(null);
     const [connected, setConnected] = useState(false);
     const [connecting, setConnecting] = useState(false);
+    const [network, setNetwork] = useState<UserNetwork>('mainnet');
 
     useEffect(() => {
         setWallet(getStoredWallet());
         setConnected(isConnected());
+        setNetwork(getSelectedNetwork());
+
+        const syncNetwork = () => setNetwork(getSelectedNetwork());
+        window.addEventListener('fatefi-network-changed', syncNetwork);
+        return () => window.removeEventListener('fatefi-network-changed', syncNetwork);
     }, []);
+
+    const switchNetwork = (next: UserNetwork) => {
+        setSelectedNetwork(next);
+        setNetwork(next);
+    };
 
     const handleConnect = async () => {
         try {
@@ -74,6 +86,20 @@ export default function Navbar() {
                     {/* Wallet Button */}
                     {connected && wallet ? (
                         <div className="flex items-center gap-3">
+                            <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+                                <button
+                                    onClick={() => switchNetwork('mainnet')}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${network === 'mainnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                                >
+                                    Mainnet
+                                </button>
+                                <button
+                                    onClick={() => switchNetwork('testnet')}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${network === 'testnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                                >
+                                    Testnet
+                                </button>
+                            </div>
                             <div className="glass-card px-3 py-1.5 text-sm font-mono text-accent-gold flex items-center gap-2">
                                 <Wallet size={12} />
                                 {shortenAddress(wallet)}
@@ -87,21 +113,51 @@ export default function Navbar() {
                             </button>
                         </div>
                     ) : (
-                        <button
-                            onClick={handleConnect}
-                            disabled={connecting}
-                            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-accent-purple text-white text-sm font-semibold 
+                        <div className="flex items-center gap-3">
+                            <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
+                                <button
+                                    onClick={() => switchNetwork('mainnet')}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${network === 'mainnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                                >
+                                    Mainnet
+                                </button>
+                                <button
+                                    onClick={() => switchNetwork('testnet')}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${network === 'testnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                                >
+                                    Testnet
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleConnect}
+                                disabled={connecting}
+                                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-accent-purple text-white text-sm font-semibold 
                          hover:bg-accent-purple/90 transition-all duration-200 disabled:opacity-50"
-                        >
-                            <Wallet size={14} />
-                            {connecting ? 'Connecting...' : 'Connect Wallet'}
-                        </button>
+                            >
+                                <Wallet size={14} />
+                                {connecting ? 'Connecting...' : 'Connect Wallet'}
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* Mobile nav */}
             <div className="md:hidden flex items-center gap-1 px-4 pb-3 overflow-x-auto">
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10 mr-2">
+                    <button
+                        onClick={() => switchNetwork('mainnet')}
+                        className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${network === 'mainnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                    >
+                        Mainnet
+                    </button>
+                    <button
+                        onClick={() => switchNetwork('testnet')}
+                        className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-colors ${network === 'testnet' ? 'bg-accent-purple text-white' : 'text-foreground/55 hover:text-foreground'}`}
+                    >
+                        Testnet
+                    </button>
+                </div>
                 {links.map((link) => (
                     <Link
                         key={link.href}

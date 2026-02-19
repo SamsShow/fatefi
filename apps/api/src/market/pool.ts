@@ -16,7 +16,9 @@ export const POOL_ABI = [
 
 const POOL_CONTRACT_ADDRESS = process.env.POOL_CONTRACT_ADDRESS || '';
 const POOL_ADMIN_KEY = process.env.POOL_ADMIN_KEY || '';
-const BASE_SEPOLIA_RPC = process.env.BASE_RPC_URL || 'https://sepolia.base.org';
+// BASE_RPC_URL should point to mainnet (https://mainnet.base.org) in production
+// and https://sepolia.base.org for testnet. Defaults to mainnet when deployed.
+const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 
 const OPTION_MAP: Record<string, number> = {
     bullish: 0,
@@ -27,13 +29,13 @@ const OPTION_MAP: Record<string, number> = {
 // ─── Admin Provider (backend) ────────────────────────────
 function getAdminWallet(): ethers.Wallet {
     if (!POOL_ADMIN_KEY) throw new Error('POOL_ADMIN_KEY not set');
-    const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
+    const provider = new ethers.JsonRpcProvider(BASE_RPC_URL);
     return new ethers.Wallet(POOL_ADMIN_KEY, provider);
 }
 
 function getPoolContract(signerOrProvider?: ethers.Signer | ethers.Provider): ethers.Contract {
     if (!POOL_CONTRACT_ADDRESS) throw new Error('POOL_CONTRACT_ADDRESS not set');
-    const provider = signerOrProvider || new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
+    const provider = signerOrProvider || new ethers.JsonRpcProvider(BASE_RPC_URL);
     return new ethers.Contract(POOL_CONTRACT_ADDRESS, POOL_ABI, provider);
 }
 

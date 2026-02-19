@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Activity, Coins, RefreshCw } from 'lucide-react';
-import { getPoolStats } from '@/lib/api';
+import { getPoolInfo, getSelectedNetwork, getNetworkLabel, type UserNetwork } from '@/lib/staking';
 
 interface PoolData {
     dayId: number;
@@ -25,10 +25,11 @@ const OPTION_CONFIG = [
 export default function PoolStats() {
     const [pool, setPool] = useState<PoolData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [network, setNetwork] = useState<UserNetwork>('mainnet');
 
     const load = async () => {
         try {
-            const data = await getPoolStats();
+            const data = await getPoolInfo();
             setPool(data);
         } catch {
             // Pool not available
@@ -38,9 +39,17 @@ export default function PoolStats() {
     };
 
     useEffect(() => {
+        const syncNetwork = () => setNetwork(getSelectedNetwork());
+        syncNetwork();
         load();
         const interval = setInterval(load, 30_000); // refresh every 30s
-        return () => clearInterval(interval);
+        window.addEventListener('fatefi-network-changed', syncNetwork);
+        window.addEventListener('fatefi-network-changed', load);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('fatefi-network-changed', syncNetwork);
+            window.removeEventListener('fatefi-network-changed', load);
+        };
     }, []);
 
     if (loading) return null;
@@ -56,6 +65,9 @@ export default function PoolStats() {
                 <div className="flex items-center gap-2">
                     <Coins size={16} className="text-accent-gold" />
                     <h3 className="text-sm font-bold">Today&apos;s Pool</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-foreground/45">
+                        {getNetworkLabel(network)}
+                    </span>
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-xs text-foreground/40">{totalCount} stakers</span>
