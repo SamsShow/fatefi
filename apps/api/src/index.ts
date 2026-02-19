@@ -13,7 +13,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Middleware ──────────────────────────────────────────
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001'], credentials: true }));
+const corsOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()) : []),
+];
+app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json());
 
 // ─── Health Check ───────────────────────────────────────
