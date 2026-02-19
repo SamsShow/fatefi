@@ -34,10 +34,9 @@ export function getISTTime(): { hour: number; minute: number } {
 }
 
 // ─── Price Fetching ──────────────────────────────────────
-
-/** Fetch current ETH/USD price from CoinGecko */
+/** Fetch current ETH/USD price from CoinGecko (no paid fallback) */
 export async function fetchEthPrice(): Promise<number> {
-    const res = await fetch(COINGECKO_URL);
+    const res = await fetch(COINGECKO_URL, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`CoinGecko error: ${res.status}`);
     const data = await res.json();
     return data.ethereum.usd;

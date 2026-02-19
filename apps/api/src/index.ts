@@ -57,7 +57,7 @@ app.listen(PORT, () => {
     console.log(`\n🔮 FateFi API running on http://localhost:${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
     console.log(`   Tarot:  http://localhost:${PORT}/api/tarot/today`);
-    console.log(`   Market: http://localhost:${PORT}/api/market/price\n`);
+    console.log(`   Market: http://localhost:${PORT}/api/market/price`);
     console.log(`   Neon market store: ${isNeonMarketStoreEnabled() ? 'enabled' : 'disabled'}\n`);
 
     // Start ETH price tracker & daily resolver

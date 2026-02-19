@@ -7,6 +7,7 @@ import PredictionForm from '@/components/PredictionForm';
 import EthPriceTicker from '@/components/EthPriceTicker';
 import YesterdayResult from '@/components/YesterdayResult';
 import PoolStats from '@/components/PoolStats';
+import ElsaPortfolio from '@/components/ElsaPortfolio';
 import { getTodayDraw, getTodayPrediction } from '@/lib/api';
 import { isConnected } from '@/lib/wallet';
 
@@ -282,6 +283,8 @@ export default function DrawPage() {
                                     ) : (
                                         <PredictionForm onSubmitted={() => setAlreadyPredicted(true)} />
                                     )}
+                                    {/* Elsa x402 — on-chain portfolio panel */}
+                                    <ElsaPortfolio />
                                 </div>
                             )}
 
