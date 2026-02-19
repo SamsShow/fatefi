@@ -1,13 +1,51 @@
 import { recordPrice, getISTTime, getYesterdayIST, getISTDate } from './ethPrice.js';
 import { resolveDay } from './resolver.js';
 import { getDb } from '../db/schema.js';
-import { drawRandomCard } from '../tarot/deck.js';
+import { drawCardForDate } from '../tarot/deck.js';
 
 const PRICE_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
 const CHECK_INTERVAL_MS = 60 * 1000;       // 1 minute
 
 let lastResolvedDate = '';
 let lastNewCardDate = '';
+
+/**
+ * Initialize scheduler state from DB so we don't re-process on restart.
+ */
+function initStateFromDb() {
+    try {
+        const db = getDb();
+
+        // Set lastResolvedDate from the most recently resolved eth_prices row
+        const lastResolved = db.prepare(
+            "SELECT date FROM eth_prices WHERE resolved = 1 ORDER BY date DESC LIMIT 1"
+        ).get() as any;
+        if (lastResolved) {
+            lastResolvedDate = lastResolved.date;
+            console.log(`[Scheduler] Restored lastResolvedDate: ${lastResolvedDate}`);
+        }
+
+        // Set lastNewCardDate from the most recent tarot_draws row
+        const lastCard = db.prepare(
+            "SELECT date FROM tarot_draws ORDER BY date DESC LIMIT 1"
+        ).get() as any;
+        if (lastCard) {
+            lastNewCardDate = lastCard.date;
+            console.log(`[Scheduler] Restored lastNewCardDate: ${lastNewCardDate}`);
+        }
+    } catch (err: any) {
+        console.error('[Scheduler] Failed to init state from DB:', err.message);
+    }
+}
+
+/**
+ * Ensure today's tarot card exists in the DB.
+ * Uses deterministic drawCardForDate() so the same date always produces the same card.
+ */
+function ensureTodayCard() {
+    const today = getISTDate();
+    createNewDayCard(today);
+}
 
 /**
  * Start background tasks:
@@ -19,6 +57,12 @@ let lastNewCardDate = '';
 export function startScheduler() {
     console.log('[Scheduler] Starting ETH price tracker (every 5 min)');
     console.log('[Scheduler] Starting day boundary checker (every 1 min)');
+
+    // Restore state from DB so we don't re-resolve or duplicate on restart
+    initStateFromDb();
+
+    // Ensure today's card exists immediately on boot
+    ensureTodayCard();
 
     // Fetch price immediately on boot
     void recordPrice();
@@ -58,6 +102,7 @@ export function startScheduler() {
 
 /**
  * Pre-create today's tarot draw so it's ready when users arrive.
+ * Uses deterministic drawCardForDate() for consistent results.
  */
 function createNewDayCard(date: string) {
     try {
@@ -68,11 +113,11 @@ function createNewDayCard(date: string) {
             return;
         }
 
-        const { card, orientation } = drawRandomCard();
+        const { card, orientation } = drawCardForDate(date);
         db.prepare('INSERT INTO tarot_draws (card_name, orientation, date) VALUES (?, ?, ?)')
             .run(card.name, orientation, date);
 
-        console.log(`[Scheduler] 12:02 AM IST — New card for ${date}: ${card.name} (${orientation})`);
+        console.log(`[Scheduler] New card for ${date}: ${card.name} (${orientation})`);
     } catch (err: any) {
         console.error(`[Scheduler] Failed to create new day card:`, err.message);
     }

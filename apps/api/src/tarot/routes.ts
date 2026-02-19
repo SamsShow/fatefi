@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../db/schema.js';
-import { drawRandomCard } from './deck.js';
+import { drawCardForDate } from './deck.js';
 import { getInterpretation } from '../ai/service.js';
 import { authMiddleware } from '../auth/routes.js';
 import { getISTDate } from '../market/ethPrice.js';
@@ -24,7 +24,7 @@ router.get('/today', async (_req: Request, res: Response) => {
         let draw = db.prepare('SELECT * FROM tarot_draws WHERE date = ?').get(today) as any;
 
         if (!draw) {
-            const { card, orientation } = drawRandomCard();
+            const { card, orientation } = drawCardForDate(today);
             const stmt = db.prepare(
                 'INSERT INTO tarot_draws (card_name, orientation, date) VALUES (?, ?, ?)'
             );

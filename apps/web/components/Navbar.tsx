@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Moon, Trophy, ScrollText, Sparkles, Wallet, LogOut } from 'lucide-react';
+import { Moon, Trophy, ScrollText, Wallet, LogOut } from 'lucide-react';
 import { signInWithWallet, disconnect, getStoredWallet, isConnected, shortenAddress } from '@/lib/wallet';
 
 export default function Navbar() {
@@ -49,7 +50,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2 group">
-                        <Sparkles size={20} className="text-accent-purple" />
+                        <Image src="/OBJECTS.png" alt="FateFi" width={32} height={32} className="rounded-full" />
                         <span className="text-xl font-bold gradient-text">FateFi</span>
                     </Link>
 

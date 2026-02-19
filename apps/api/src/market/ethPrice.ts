@@ -3,29 +3,34 @@ import { upsertNeonMarketSnapshot } from './neonStore.js';
 
 const COINGECKO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd';
 
-// ─── IST Helpers ─────────────────────────────────────────
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
+// ─── IST Helpers (Asia/Kolkata via Intl API) ──────────────
+const IST_TZ = 'Asia/Kolkata';
 
 /** Get the current date string in IST (YYYY-MM-DD) */
 export function getISTDate(): string {
-    const now = new Date();
-    const ist = new Date(now.getTime() + IST_OFFSET_MS);
-    return ist.toISOString().split('T')[0];
+    return new Intl.DateTimeFormat('en-CA', { timeZone: IST_TZ }).format(new Date());
 }
 
 /** Get yesterday's date string in IST (YYYY-MM-DD) */
 export function getYesterdayIST(): string {
     const now = new Date();
-    const ist = new Date(now.getTime() + IST_OFFSET_MS);
-    ist.setDate(ist.getDate() - 1);
-    return ist.toISOString().split('T')[0];
+    // Subtract 1 day in UTC then format in IST
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return new Intl.DateTimeFormat('en-CA', { timeZone: IST_TZ }).format(yesterday);
 }
 
 /** Get current IST hour (0-23) and minute (0-59) */
 export function getISTTime(): { hour: number; minute: number } {
     const now = new Date();
-    const ist = new Date(now.getTime() + IST_OFFSET_MS);
-    return { hour: ist.getUTCHours(), minute: ist.getUTCMinutes() };
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: IST_TZ,
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false,
+    }).formatToParts(now);
+    const hour = parseInt(parts.find(p => p.type === 'hour')!.value, 10);
+    const minute = parseInt(parts.find(p => p.type === 'minute')!.value, 10);
+    return { hour, minute };
 }
 
 // ─── Price Fetching ──────────────────────────────────────

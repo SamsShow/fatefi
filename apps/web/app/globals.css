@@ -229,3 +229,54 @@ body {
 .white-flash {
   animation: whiteFlash 0.7s ease-out forwards;
 }
+
+/* ─── Oracle Interpretation Card ─── */
+@keyframes oracleBorderRotate {
+  0% {
+    --oracle-angle: 0deg;
+  }
+
+  100% {
+    --oracle-angle: 360deg;
+  }
+}
+
+@property --oracle-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.oracle-border-glow {
+  background: conic-gradient(from var(--oracle-angle),
+      var(--accent-purple) 0%,
+      var(--accent-gold) 25%,
+      var(--accent-pink) 50%,
+      var(--accent-purple) 75%,
+      var(--accent-gold) 100%);
+  animation: oracleBorderRotate 4s linear infinite;
+}
+
+.oracle-icon-glow {
+  background: radial-gradient(circle, rgba(124, 106, 247, 0.15) 0%, transparent 70%);
+  box-shadow: 0 0 20px rgba(124, 106, 247, 0.1);
+}
+
+.oracle-tone-badge {
+  background: linear-gradient(135deg, rgba(124, 106, 247, 0.15) 0%, rgba(201, 168, 76, 0.12) 100%);
+  border: 1px solid rgba(124, 106, 247, 0.2);
+  color: var(--accent-gold);
+  animation: badgePulse 3s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0px rgba(201, 168, 76, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+  }
+}

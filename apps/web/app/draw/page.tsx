@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, AlertCircle, BrainCircuit, Lock, MousePointerClick, Loader2, CalendarDays, Wallet } from 'lucide-react';
+import { Moon, AlertCircle, Lock, MousePointerClick, Loader2, CalendarDays, Wallet } from 'lucide-react';
 import TarotCard from '@/components/TarotCard';
 import PredictionForm from '@/components/PredictionForm';
 import EthPriceTicker from '@/components/EthPriceTicker';
@@ -19,6 +19,9 @@ interface DrawData {
         prediction: string;
         narrative: string;
         confidence_tone: string;
+        market_mood?: string | null;
+        key_levels?: string | null;
+        cosmic_tip?: string | null;
         disclaimer: string;
     } | null;
 }
@@ -156,32 +159,102 @@ export default function DrawPage() {
                                 />
                             </div>
 
-                            {/* AI Interpretation */}
+                            {/* AI Interpretation — Mystical Oracle Card */}
                             {revealed && draw.ai_interpretation && (
-                                <div className="glass-card p-6 md:p-8 mb-8 animate-[fadeIn_0.5s_ease-out]">
-                                    <div className="flex items-center gap-2 mb-5">
-                                        <BrainCircuit size={20} className="text-accent-purple shrink-0" />
-                                        <h2 className="text-lg font-bold">Oracle&apos;s Interpretation</h2>
-                                        <span className="ml-auto text-xs px-3 py-1 rounded-full bg-accent-purple/15 text-accent-purple font-medium border border-accent-purple/20">
-                                            {draw.ai_interpretation.confidence_tone}
-                                        </span>
-                                    </div>
+                                <div className="relative mb-8 animate-[fadeIn_0.6s_ease-out]">
+                                    {/* Animated gradient border wrapper */}
+                                    <div className="absolute -inset-[1px] rounded-2xl oracle-border-glow opacity-60" />
 
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="text-xs text-accent-gold font-mono tracking-wider mb-1.5 opacity-75">PREDICTION</div>
-                                            <p className="text-foreground/80 leading-relaxed">{draw.ai_interpretation.prediction}</p>
+                                    <div className="relative rounded-2xl overflow-hidden"
+                                        style={{
+                                            background: 'linear-gradient(165deg, rgba(20,24,48,0.95) 0%, rgba(12,15,26,0.98) 50%, rgba(22,18,40,0.95) 100%)',
+                                        }}
+                                    >
+                                        {/* Sparkle decorations */}
+                                        <div className="absolute top-4 right-6 text-accent-gold/30 text-lg animate-[twinkle_2s_ease-in-out_infinite]">✦</div>
+                                        <div className="absolute top-12 right-14 text-accent-purple/20 text-sm animate-[twinkle_3s_ease-in-out_infinite_0.5s]">✧</div>
+                                        <div className="absolute bottom-16 left-6 text-accent-gold/20 text-sm animate-[twinkle_2.5s_ease-in-out_infinite_1s]">✦</div>
+
+                                        {/* Header */}
+                                        <div className="px-6 md:px-8 pt-6 pb-4 flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl flex items-center justify-center oracle-icon-glow">
+                                                <span className="text-xl">🔮</span>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-bold gradient-text">Oracle&apos;s Vision</h2>
+                                                <p className="text-xs text-foreground/35 tracking-wide">The cosmos has spoken</p>
+                                            </div>
+                                            <div className="ml-auto px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide oracle-tone-badge">
+                                                {draw.ai_interpretation.confidence_tone}
+                                            </div>
                                         </div>
 
-                                        <div className="w-full h-px bg-white/8" />
-
-                                        <div>
-                                            <div className="text-xs text-accent-gold font-mono tracking-wider mb-1.5 opacity-75">NARRATIVE</div>
-                                            <p className="text-foreground/65 leading-relaxed italic font-serif">{draw.ai_interpretation.narrative}</p>
+                                        {/* Divider with star */}
+                                        <div className="flex items-center gap-3 px-6 md:px-8">
+                                            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-purple/25 to-transparent" />
+                                            <span className="text-accent-gold/40 text-[10px]">☽ ✦ ☾</span>
+                                            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-purple/25 to-transparent" />
                                         </div>
 
-                                        <div className="text-xs text-foreground/30 bg-white/4 px-3 py-2 rounded-lg border border-white/5">
-                                            {draw.ai_interpretation.disclaimer}
+                                        {/* Prediction — Hero Section */}
+                                        <div className="px-6 md:px-8 py-5">
+                                            <div className="relative pl-4 border-l-2 border-accent-gold/30">
+                                                <div className="text-[10px] text-accent-gold font-mono tracking-[0.2em] mb-2 uppercase">⚡ Prediction</div>
+                                                <p className="text-foreground/90 text-base md:text-lg leading-relaxed font-medium">
+                                                    {draw.ai_interpretation.prediction}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Narrative — Mystic Quote */}
+                                        <div className="mx-6 md:mx-8 mb-5 p-4 md:p-5 rounded-xl"
+                                            style={{ background: 'rgba(124,106,247,0.04)', border: '1px solid rgba(124,106,247,0.08)' }}
+                                        >
+                                            <div className="text-[10px] text-accent-purple font-mono tracking-[0.2em] mb-2 uppercase">🌙 Narrative</div>
+                                            <p className="text-foreground/55 leading-relaxed italic font-serif text-[15px]">
+                                                &ldquo;{draw.ai_interpretation.narrative}&rdquo;
+                                            </p>
+                                        </div>
+
+                                        {/* Market Mood + Key Levels — Side by Side */}
+                                        {(draw.ai_interpretation.market_mood || draw.ai_interpretation.key_levels) && (
+                                            <div className="mx-6 md:mx-8 mb-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {draw.ai_interpretation.market_mood && (
+                                                    <div className="p-3.5 rounded-xl" style={{ background: 'rgba(76,175,130,0.05)', border: '1px solid rgba(76,175,130,0.1)' }}>
+                                                        <div className="text-[10px] text-accent-green font-mono tracking-[0.2em] mb-1.5 uppercase">📊 Market Mood</div>
+                                                        <p className="text-foreground/65 text-sm leading-relaxed">{draw.ai_interpretation.market_mood}</p>
+                                                    </div>
+                                                )}
+                                                {draw.ai_interpretation.key_levels && (
+                                                    <div className="p-3.5 rounded-xl" style={{ background: 'rgba(192,69,90,0.05)', border: '1px solid rgba(192,69,90,0.1)' }}>
+                                                        <div className="text-[10px] text-accent-red font-mono tracking-[0.2em] mb-1.5 uppercase">🎯 Key Levels</div>
+                                                        <p className="text-foreground/65 text-sm leading-relaxed">{draw.ai_interpretation.key_levels}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Cosmic Tip — Golden Callout */}
+                                        {draw.ai_interpretation.cosmic_tip && (
+                                            <div className="mx-6 md:mx-8 mb-5 p-4 rounded-xl flex items-start gap-3"
+                                                style={{ background: 'linear-gradient(135deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%)', border: '1px solid rgba(201,168,76,0.15)' }}
+                                            >
+                                                <span className="text-lg shrink-0 mt-0.5">💡</span>
+                                                <div>
+                                                    <div className="text-[10px] text-accent-gold font-mono tracking-[0.2em] mb-1 uppercase">Cosmic Tip</div>
+                                                    <p className="text-foreground/75 text-sm leading-relaxed font-medium">{draw.ai_interpretation.cosmic_tip}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Disclaimer — Playful */}
+                                        <div className="mx-6 md:mx-8 mb-6 flex items-start gap-2 px-3 py-2.5 rounded-lg"
+                                            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+                                        >
+                                            <span className="text-sm shrink-0 mt-px">🃏</span>
+                                            <p className="text-[11px] text-foreground/30 leading-relaxed">
+                                                {draw.ai_interpretation.disclaimer}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
