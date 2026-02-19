@@ -43,12 +43,22 @@ export default function HistoryPage() {
     const [notConnected, setNotConnected] = useState(false);
 
     useEffect(() => {
-        if (!isConnected()) {
-            setNotConnected(true);
-            setLoading(false);
-            return;
-        }
-        loadPredictions();
+        const syncAuth = () => {
+            if (!isConnected()) {
+                setNotConnected(true);
+                setPredictions([]);
+                setLoading(false);
+                return;
+            }
+
+            setNotConnected(false);
+            setLoading(true);
+            void loadPredictions();
+        };
+
+        syncAuth();
+        window.addEventListener('fatefi-auth-changed', syncAuth);
+        return () => window.removeEventListener('fatefi-auth-changed', syncAuth);
     }, []);
 
     async function loadPredictions() {
@@ -118,7 +128,7 @@ export default function HistoryPage() {
                             const badge = RESULT_BADGES[pred.result];
                             return (
                                 <div key={pred.id} className="glass-card p-4 flex items-center gap-4 hover:bg-white/4 transition-colors">
-                                    <div className="relative w-10 h-[60px] rounded-md overflow-hidden shadow-card flex-shrink-0">
+                                    <div className="relative w-10 h-[60px] rounded-md overflow-hidden shadow-card shrink-0">
                                         <Image src={getCardImagePath(pred.card_name)} alt={pred.card_name} fill className="object-cover" sizes="40px" />
                                     </div>
                                     <div className="flex-1 min-w-0">

@@ -29,6 +29,7 @@ export async function signInWithWallet(): Promise<{ token: string; user: any }> 
     // Store token & wallet
     localStorage.setItem('fatefi_token', result.token);
     localStorage.setItem('fatefi_wallet', address);
+    window.dispatchEvent(new Event('fatefi-auth-changed'));
 
     return result;
 }
@@ -36,6 +37,7 @@ export async function signInWithWallet(): Promise<{ token: string; user: any }> 
 export function disconnect() {
     localStorage.removeItem('fatefi_token');
     localStorage.removeItem('fatefi_wallet');
+    window.dispatchEvent(new Event('fatefi-auth-changed'));
 }
 
 export function getStoredWallet(): string | null {

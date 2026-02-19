@@ -74,3 +74,12 @@ export async function getTodayPrediction() {
 export async function getLeaderboard() {
     return request<any[]>('/leaderboard');
 }
+
+// ─── Market ──────────────────────────────────────────────
+export async function getEthPrice() {
+    return request<any>('/market/price');
+}
+
+export async function getYesterdayResult() {
+    return request<any>('/market/yesterday');
+}

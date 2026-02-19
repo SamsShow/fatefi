@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../db/schema.js';
+import { authMiddleware } from '../auth/routes.js';
 
 const router = Router();
+router.use(authMiddleware);
 
 /**
  * GET /api/leaderboard

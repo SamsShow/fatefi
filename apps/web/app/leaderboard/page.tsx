@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trophy, Users, Flame } from 'lucide-react';
+import { Trophy, Users, Flame, Wallet } from 'lucide-react';
 import { getLeaderboard } from '@/lib/api';
+import { isConnected } from '@/lib/wallet';
 
 interface LeaderEntry {
     rank: number;
@@ -34,11 +35,25 @@ function getRankColor(rank: number): string {
 }
 
 export default function LeaderboardPage() {
+    const [connected, setConnected] = useState(false);
     const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadLeaderboard();
+        const syncAuth = () => {
+            const hasAuth = isConnected();
+            setConnected(hasAuth);
+            if (hasAuth) {
+                void loadLeaderboard();
+            } else {
+                setLeaders([]);
+                setLoading(false);
+            }
+        };
+
+        syncAuth();
+        window.addEventListener('fatefi-auth-changed', syncAuth);
+        return () => window.removeEventListener('fatefi-auth-changed', syncAuth);
     }, []);
 
     async function loadLeaderboard() {
@@ -60,7 +75,13 @@ export default function LeaderboardPage() {
                 <p className="text-foreground/45">Top oracles ranked by total points</p>
             </div>
 
-            {loading ? (
+            {!connected ? (
+                <div className="glass-card p-12 text-center">
+                    <Wallet size={48} className="mx-auto mb-4 text-foreground/20" strokeWidth={1.5} />
+                    <h3 className="text-xl font-bold mb-2">Connect Your Wallet</h3>
+                    <p className="text-foreground/45">Sign in with your wallet to view the leaderboard.</p>
+                </div>
+            ) : loading ? (
                 <div className="space-y-3">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="glass-card p-4 shimmer h-16 rounded-xl" />

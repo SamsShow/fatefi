@@ -2,11 +2,14 @@ import { Router, Request, Response } from 'express';
 import { getDb } from '../db/schema.js';
 import { drawRandomCard } from './deck.js';
 import { getInterpretation } from '../ai/service.js';
+import { authMiddleware } from '../auth/routes.js';
+import { getISTDate } from '../market/ethPrice.js';
 
 const router = Router();
+router.use(authMiddleware);
 
 function getTodayDate(): string {
-    return new Date().toISOString().split('T')[0];
+    return getISTDate();
 }
 
 /**

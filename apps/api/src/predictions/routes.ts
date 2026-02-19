@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../db/schema.js';
 import { authMiddleware } from '../auth/routes.js';
+import { getISTDate } from '../market/ethPrice.js';
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.post('/', authMiddleware, (req: Request, res: Response) => {
         }
 
         const db = getDb();
-        const today = new Date().toISOString().split('T')[0];
+        const today = getISTDate();
 
         // Get today's tarot draw
         const draw = db.prepare('SELECT id FROM tarot_draws WHERE date = ?').get(today) as any;
@@ -89,7 +90,7 @@ router.get('/today', authMiddleware, (req: Request, res: Response) => {
     try {
         const userId = (req as any).userId;
         const db = getDb();
-        const today = new Date().toISOString().split('T')[0];
+        const today = getISTDate();
 
         const draw = db.prepare('SELECT id FROM tarot_draws WHERE date = ?').get(today) as any;
         if (!draw) {

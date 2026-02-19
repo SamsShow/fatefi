@@ -8,17 +8,17 @@ const DB_PATH = path.join(__dirname, '../../fatefi.db');
 let db: Database.Database;
 
 export function getDb(): Database.Database {
-    if (!db) {
-        db = new Database(DB_PATH);
-        db.pragma('journal_mode = WAL');
-        db.pragma('foreign_keys = ON');
-        initSchema();
-    }
-    return db;
+  if (!db) {
+    db = new Database(DB_PATH);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initSchema();
+  }
+  return db;
 }
 
 function initSchema() {
-    db.exec(`
+  db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       wallet_address TEXT UNIQUE NOT NULL,
@@ -55,6 +55,20 @@ function initSchema() {
       wallet_address TEXT PRIMARY KEY,
       nonce TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS eth_prices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT UNIQUE NOT NULL,
+      open_price REAL,
+      close_price REAL,
+      high_price REAL,
+      low_price REAL,
+      latest_price REAL,
+      resolved INTEGER DEFAULT 0,
+      resolved_outcome TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
     );
   `);
 }

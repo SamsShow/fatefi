@@ -5,6 +5,9 @@ import tarotRoutes from './tarot/routes.js';
 import authRoutes from './auth/routes.js';
 import predictionRoutes from './predictions/routes.js';
 import leaderboardRoutes from './leaderboard/routes.js';
+import marketRoutes from './market/routes.js';
+import { startScheduler } from './market/scheduler.js';
+import { isNeonMarketStoreEnabled } from './market/neonStore.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,10 +26,16 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tarot', tarotRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/market', marketRoutes);
 
 // ─── Start ──────────────────────────────────────────────
 app.listen(PORT, () => {
     console.log(`\n🔮 FateFi API running on http://localhost:${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
-    console.log(`   Tarot:  http://localhost:${PORT}/api/tarot/today\n`);
+    console.log(`   Tarot:  http://localhost:${PORT}/api/tarot/today`);
+    console.log(`   Market: http://localhost:${PORT}/api/market/price\n`);
+    console.log(`   Neon market store: ${isNeonMarketStoreEnabled() ? 'enabled' : 'disabled'}\n`);
+
+    // Start ETH price tracker & daily resolver
+    startScheduler();
 });
