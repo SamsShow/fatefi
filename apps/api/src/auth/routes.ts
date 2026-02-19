@@ -4,7 +4,7 @@ import { verifyMessage } from 'ethers';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-const router = Router();
+const router: ReturnType<typeof Router> = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fatefi-dev-secret';
 
 /**

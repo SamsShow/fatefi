@@ -3,7 +3,7 @@ import { getDb } from '../db/schema.js';
 import { authMiddleware } from '../auth/routes.js';
 import { getISTDate } from '../market/ethPrice.js';
 
-const router = Router();
+const router: ReturnType<typeof Router> = Router();
 
 /**
  * POST /api/predictions

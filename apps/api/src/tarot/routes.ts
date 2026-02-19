@@ -5,7 +5,7 @@ import { getInterpretation } from '../ai/service.js';
 import { authMiddleware } from '../auth/routes.js';
 import { getISTDate } from '../market/ethPrice.js';
 
-const router = Router();
+const router: ReturnType<typeof Router> = Router();
 router.use(authMiddleware);
 
 function getTodayDate(): string {

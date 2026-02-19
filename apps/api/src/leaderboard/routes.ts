@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { getDb } from '../db/schema.js';
 import { authMiddleware } from '../auth/routes.js';
 
-const router = Router();
+const router: ReturnType<typeof Router> = Router();
 router.use(authMiddleware);
 
 /**
@@ -10,10 +10,10 @@ router.use(authMiddleware);
  * Returns top users ranked by total points.
  */
 router.get('/', (_req: Request, res: Response) => {
-    try {
-        const db = getDb();
+  try {
+    const db = getDb();
 
-        const leaders = db.prepare(`
+    const leaders = db.prepare(`
       SELECT
         u.id,
         u.wallet_address,
@@ -35,15 +35,15 @@ router.get('/', (_req: Request, res: Response) => {
       LIMIT 100
     `).all();
 
-        const ranked = leaders.map((entry: any, index: number) => ({
-            rank: index + 1,
-            ...entry,
-        }));
+    const ranked = leaders.map((entry: any, index: number) => ({
+      rank: index + 1,
+      ...entry,
+    }));
 
-        res.json({ success: true, data: ranked });
-    } catch (err: any) {
-        res.status(500).json({ success: false, error: err.message });
-    }
+    res.json({ success: true, data: ranked });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 export default router;
