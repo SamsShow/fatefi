@@ -24,6 +24,12 @@ app.use(
             if (!origin) return cb(null, true);
             if (corsOrigins.includes(origin)) return cb(null, true);
             if (origin.endsWith('.vercel.app')) return cb(null, true);
+            try {
+                const host = new URL(origin).hostname;
+                if (host === 'fatefi.fun' || host.endsWith('.fatefi.fun')) return cb(null, true);
+            } catch {
+                /* invalid URL */
+            }
             cb(null, false);
         },
         credentials: true,
