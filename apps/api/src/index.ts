@@ -16,9 +16,19 @@ const PORT = process.env.PORT || 3001;
 const corsOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
-    ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()) : []),
+    ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean) : []),
 ];
-app.use(cors({ origin: corsOrigins, credentials: true }));
+app.use(
+    cors({
+        origin: (origin, cb) => {
+            if (!origin) return cb(null, true);
+            if (corsOrigins.includes(origin)) return cb(null, true);
+            if (origin.endsWith('.vercel.app')) return cb(null, true);
+            cb(null, false);
+        },
+        credentials: true,
+    })
+);
 app.use(express.json());
 
 // ─── Health Check ───────────────────────────────────────
