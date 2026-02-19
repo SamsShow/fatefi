@@ -63,6 +63,9 @@ export interface AIInterpretation {
     prediction: string;
     narrative: string;
     confidence_tone: string;
+    market_mood?: string | null;
+    key_levels?: string | null;
+    cosmic_tip?: string | null;
     disclaimer: string;
 }
 

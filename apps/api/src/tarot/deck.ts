@@ -65,7 +65,33 @@ function capitalize(s: string): string {
 export const FULL_DECK: TarotCard[] = [...MAJOR_ARCANA, ...buildMinorArcana()];
 
 /**
+ * Simple FNV-1a hash that maps a string to a 32-bit unsigned integer.
+ * Used to create a deterministic seed from a date string.
+ */
+function fnv1aHash(str: string): number {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = (hash * 0x01000193) >>> 0; // keep as unsigned 32-bit
+    }
+    return hash;
+}
+
+/**
+ * Draw a deterministic tarot card for a given date.
+ * The same date string always produces the same card + orientation.
+ */
+export function drawCardForDate(date: string): { card: TarotCard; orientation: Orientation } {
+    const seed = fnv1aHash(`fatefi-daily-${date}`);
+    const index = seed % FULL_DECK.length;
+    const card = FULL_DECK[index];
+    const orientation: Orientation = (seed >>> 16) % 2 === 0 ? 'upright' : 'reversed';
+    return { card, orientation };
+}
+
+/**
  * Draw a random tarot card with cryptographic randomness.
+ * @deprecated Use drawCardForDate() for daily draws.
  */
 export function drawRandomCard(): { card: TarotCard; orientation: Orientation } {
     const index = randomInt(FULL_DECK.length);

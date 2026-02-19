@@ -18,6 +18,9 @@ const crimson = Crimson_Text({
 export const metadata: Metadata = {
   title: "FateFi — Tarot-Powered Market Predictions",
   description: "Draw the cards. Read the cosmos. Predict the market. A mystical, gamified prediction platform powered by AI and ancient wisdom. Entertainment only.",
+  icons: {
+    icon: "/OBJECTS.png",
+  },
 };
 
 export default function RootLayout({
