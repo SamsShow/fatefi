@@ -1,12 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Flame, Trophy, AlertTriangle } from "lucide-react";
+import { Flame, Trophy, AlertTriangle, Layers } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Hero Section */}
       <section className="text-center py-20 md:py-32">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-[#0052FF]/20 mb-8">
+          <Layers size={14} className="text-[#0052FF]" />
+          <span className="text-sm font-medium text-foreground/80">Live on Base testnet</span>
+        </div>
         {/* Fanned card showcase */}
         <div className="relative w-64 h-48 mx-auto mb-10">
           <div className="absolute left-1/2 top-1/2 -translate-x-[70%] -translate-y-1/2 -rotate-12 w-28 h-44 rounded-xl overflow-hidden shadow-elevated opacity-60 hover:opacity-90 transition-opacity duration-300">
