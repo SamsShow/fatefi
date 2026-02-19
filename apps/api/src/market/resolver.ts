@@ -74,5 +74,16 @@ export async function resolveDay(date: string): Promise<boolean> {
         console.log(`[Resolve] No tarot draw found for ${date}`);
     }
 
+    // Trigger on-chain pool resolution
+    try {
+        const { triggerContractResolution } = await import('./pool.js');
+        const txHash = await triggerContractResolution(outcome);
+        if (txHash) {
+            console.log(`[Resolve] On-chain pool resolved: ${txHash}`);
+        }
+    } catch (err: any) {
+        console.error(`[Resolve] On-chain resolution error:`, err.message);
+    }
+
     return true;
 }

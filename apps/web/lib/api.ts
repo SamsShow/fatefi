@@ -83,3 +83,7 @@ export async function getEthPrice() {
 export async function getYesterdayResult() {
     return request<any>('/market/yesterday');
 }
+
+export async function getPoolStats() {
+    return request<any>('/market/pool');
+}

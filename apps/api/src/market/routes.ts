@@ -85,4 +85,18 @@ router.get('/yesterday', async (_req: Request, res: Response) => {
     }
 });
 
+/**
+ * GET /api/market/pool
+ * Returns current day's on-chain pool stats.
+ */
+router.get('/pool', async (_req: Request, res: Response) => {
+    try {
+        const { getCurrentDayInfo } = await import('./pool.js');
+        const info = await getCurrentDayInfo();
+        res.json({ success: true, data: info });
+    } catch (err: any) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 export default router;

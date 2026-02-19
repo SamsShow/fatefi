@@ -6,6 +6,7 @@ import TarotCard from '@/components/TarotCard';
 import PredictionForm from '@/components/PredictionForm';
 import EthPriceTicker from '@/components/EthPriceTicker';
 import YesterdayResult from '@/components/YesterdayResult';
+import PoolStats from '@/components/PoolStats';
 import { getTodayDraw, getTodayPrediction } from '@/lib/api';
 import { isConnected } from '@/lib/wallet';
 
@@ -183,6 +184,13 @@ export default function DrawPage() {
                                             {draw.ai_interpretation.disclaimer}
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Pool Stats */}
+                            {revealed && (
+                                <div className="animate-[fadeIn_0.3s_ease-out]">
+                                    <PoolStats />
                                 </div>
                             )}
 
