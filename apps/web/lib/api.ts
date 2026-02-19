@@ -9,6 +9,8 @@ function getHeaders(): HeadersInit {
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
+    // Skip ngrok's "Visit Site" interstitial (returns HTML instead of JSON)
+    if (API_BASE.includes('ngrok')) headers['ngrok-skip-browser-warning'] = 'true';
     return headers;
 }
 
