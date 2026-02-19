@@ -3,7 +3,7 @@
 import { BrowserProvider, Contract, parseEther, formatEther } from 'ethers';
 
 // ─── Contract Config ─────────────────────────────────────
-const DEFAULT_CHAIN_ENV = process.env.NEXT_PUBLIC_CHAIN_ENV === 'mainnet' ? 'mainnet' : 'testnet';
+const DEFAULT_CHAIN_ENV = process.env.NEXT_PUBLIC_CHAIN_ENV === 'testnet' ? 'testnet' : 'mainnet';
 const POOL_CONTRACT_MAINNET = process.env.NEXT_PUBLIC_POOL_CONTRACT_MAINNET || process.env.NEXT_PUBLIC_POOL_CONTRACT || '';
 const POOL_CONTRACT_TESTNET = process.env.NEXT_PUBLIC_POOL_CONTRACT_TESTNET || '';
 const NETWORK_STORAGE_KEY = 'fatefi_network';
@@ -13,7 +13,8 @@ export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const BASE_MAINNET_CHAIN_ID = 8453;
 
 function normalizeNetwork(network: string | null | undefined): UserNetwork {
-    return network === 'mainnet' ? 'mainnet' : 'testnet';
+    if (network === 'mainnet' || network === 'testnet') return network;
+    return DEFAULT_CHAIN_ENV;
 }
 
 export function getSelectedNetwork(): UserNetwork {
