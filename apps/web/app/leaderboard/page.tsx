@@ -73,6 +73,7 @@ export default function LeaderboardPage() {
                 <Trophy size={44} className="mx-auto mb-3 text-accent-gold" strokeWidth={1.5} />
                 <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">Leaderboard</h1>
                 <p className="text-foreground/45">Top oracles ranked by total points</p>
+                <p className="text-accent-gold/90 text-sm mt-2 font-medium text-glow-gold">Monthly leaderboard winner will get FateFi token airdrop</p>
             </div>
 
             {!connected ? (

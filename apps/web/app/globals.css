@@ -297,3 +297,67 @@ body {
 .mainnet-badge-glow {
   animation: mainnetGlow 2.4s ease-in-out infinite;
 }
+
+/* ─── Text Glow (gold) ─── */
+@keyframes textGlowPulse {
+  0%, 100% {
+    text-shadow: 0 0 12px rgba(201, 168, 76, 0.5), 0 0 24px rgba(201, 168, 76, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(201, 168, 76, 0.8), 0 0 40px rgba(201, 168, 76, 0.5);
+  }
+}
+
+.text-glow-gold {
+  animation: textGlowPulse 2.5s ease-in-out infinite;
+}
+
+/* ─── Token Link Neon Border (circling light) ─── */
+@keyframes neonBorderRotate {
+  0% {
+    --neon-angle: 0deg;
+  }
+  100% {
+    --neon-angle: 360deg;
+  }
+}
+
+@property --neon-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.token-link-neon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 12px;
+  background: conic-gradient(
+    from var(--neon-angle),
+    var(--accent-purple) 0deg 45deg,
+    var(--accent-gold) 45deg 90deg,
+    var(--accent-pink) 90deg 135deg,
+    rgba(124, 106, 247, 0.2) 135deg 270deg,
+    var(--accent-purple) 270deg 315deg,
+    var(--accent-gold) 315deg 360deg
+  );
+  animation: neonBorderRotate 2.5s linear infinite;
+  box-shadow: 0 0 16px rgba(124, 106, 247, 0.5), 0 0 32px rgba(124, 106, 247, 0.2);
+}
+
+.token-link-neon::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+  z-index: 0;
+}
+
+.token-link-neon > a {
+  position: relative;
+  z-index: 1;
+}

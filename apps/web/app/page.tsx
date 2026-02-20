@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Flame, Trophy, AlertTriangle, Layers } from "lucide-react";
+import { Flame, Trophy, AlertTriangle, Layers, ExternalLink } from "lucide-react";
 import { getSelectedNetwork, type UserNetwork } from "@/lib/staking";
 
 export default function Home() {
@@ -20,12 +20,34 @@ export default function Home() {
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Hero Section */}
       <section className="text-center py-20 md:py-32">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-accent-purple/35 bg-gradient-to-r from-accent-purple/10 to-accent-gold/10 mainnet-badge-glow mb-8">
-          <Layers size={14} className="text-[#0052FF]" />
-          <span className="text-sm font-medium text-foreground/80">Live on {network === 'mainnet' ? 'Base Mainnet' : 'Base Sepolia'}</span>
-        </div>
-        <div className="mb-8 flex justify-center">
-          <p className="text-xs text-foreground/70 tracking-wide">Powered by ELSA x402 · User-paid onchain insights</p>
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-accent-purple/35 bg-gradient-to-r from-accent-purple/10 to-accent-gold/10 mainnet-badge-glow">
+            <Layers size={14} className="text-[#0052FF]" />
+            <span className="text-sm font-medium text-foreground/80">Live on {network === 'mainnet' ? 'Base Mainnet' : 'Base Sepolia'}</span>
+          </div>
+          {/* Elsa AI branding */}
+          <a
+            href="https://heyelsa.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl glass-card border border-white/10 hover:border-accent-purple/30 transition-all duration-300 group"
+          >
+          <Image
+            src="/elsa-icon.svg"
+            alt="Elsa AI"
+            width={36}
+            height={36}
+            className="shrink-0"
+          />
+          <div className="text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold text-foreground/90">Powered by Elsa AI</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent-purple/20 text-accent-purple">x402</span>
+              <ExternalLink size={12} className="text-foreground/40 group-hover:text-accent-purple transition-colors" />
+            </div>
+            <p className="text-[11px] text-foreground/50 tracking-wide">User-paid onchain insights</p>
+          </div>
+        </a>
         </div>
         {/* Fanned card showcase */}
         <div className="relative w-64 h-48 mx-auto mb-10">
