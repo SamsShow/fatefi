@@ -19,7 +19,9 @@ export const metadata: Metadata = {
   title: "FateFi — Tarot-Powered Market Predictions",
   description: "Draw the cards. Read the cosmos. Predict the market. A mystical, gamified prediction platform powered by AI and ancient wisdom. Entertainment only.",
   icons: {
-    icon: "/OBJECTS.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
 };
 
