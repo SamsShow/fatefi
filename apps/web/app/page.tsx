@@ -24,6 +24,9 @@ export default function Home() {
           <Layers size={14} className="text-[#0052FF]" />
           <span className="text-sm font-medium text-foreground/80">Live on {network === 'mainnet' ? 'Base Mainnet' : 'Base Sepolia'}</span>
         </div>
+        <div className="mb-8 flex justify-center">
+          <p className="text-xs text-foreground/70 tracking-wide">Powered by ELSA x402 · User-paid onchain insights</p>
+        </div>
         {/* Fanned card showcase */}
         <div className="relative w-64 h-48 mx-auto mb-10">
           <div className="absolute left-1/2 top-1/2 -translate-x-[70%] -translate-y-1/2 -rotate-12 w-28 h-44 rounded-xl overflow-hidden shadow-elevated opacity-60 hover:opacity-90 transition-opacity duration-300">
