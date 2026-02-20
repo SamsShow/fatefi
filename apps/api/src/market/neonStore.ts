@@ -94,7 +94,8 @@ export async function upsertNeonMarketSnapshot(snapshot: MarketSnapshot): Promis
                 updated_at = now()
         `;
     } catch (err: any) {
-        console.warn('[Neon] Failed to upsert market snapshot:', err.message);
+        const cause = err?.cause ? ` (cause: ${err.cause?.message ?? err.cause})` : '';
+        console.warn('[Neon] Failed to upsert market snapshot:', err.message + cause);
     }
 }
 
@@ -120,7 +121,8 @@ export async function getNeonDaySnapshot(date: string): Promise<MarketSnapshot |
         `;
         return ((rows as any[])[0] as MarketSnapshot | undefined) ?? null;
     } catch (err: any) {
-        console.warn('[Neon] Failed to fetch market snapshot:', err.message);
+        const cause = err?.cause ? ` (cause: ${err.cause?.message ?? err.cause})` : '';
+        console.warn('[Neon] Failed to fetch market snapshot:', err.message + cause);
         return null;
     }
 }

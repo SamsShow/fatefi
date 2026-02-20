@@ -51,6 +51,15 @@ body {
   border-radius: 3px;
 }
 
+/* Hide scrollbar for nav overflow (keep functionality) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ─── Glass Card ─── */
 .glass-card {
   background: var(--glass-bg);
