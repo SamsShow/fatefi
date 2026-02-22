@@ -17,6 +17,23 @@ const crimson = Crimson_Text({
 });
 
 const ROOT_URL = "https://fatefi.fun";
+const BASE_APP_ID = process.env.NEXT_PUBLIC_BASE_APP_ID;
+
+const otherMeta: NonNullable<Metadata["other"]> = {
+  "fc:miniapp": JSON.stringify({
+    version: "next",
+    imageUrl: `${ROOT_URL}/og-image.png`,
+    button: {
+      title: "Draw Your Cards",
+      action: {
+        type: "launch_miniapp",
+        name: "FateFi",
+        url: ROOT_URL,
+      },
+    },
+  }),
+  ...(BASE_APP_ID ? { "base:app_id": BASE_APP_ID } : {}),
+};
 
 export const metadata: Metadata = {
   title: "FateFi — Tarot-Powered Market Predictions",
@@ -26,21 +43,8 @@ export const metadata: Metadata = {
     shortcut: "/icon.png",
     apple: "/icon.png",
   },
-  // Base Mini App embed metadata — required for rich link previews in the Base app
-  other: {
-    "fc:miniapp": JSON.stringify({
-      version: "next",
-      imageUrl: `${ROOT_URL}/og-image.png`,
-      button: {
-        title: "Draw Your Cards",
-        action: {
-          type: "launch_miniapp",
-          name: "FateFi",
-          url: ROOT_URL,
-        },
-      },
-    }),
-  },
+  // Base Mini App embed metadata + optional Base Build ownership tag.
+  other: otherMeta,
 };
 
 export default function RootLayout({
