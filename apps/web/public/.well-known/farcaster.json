@@ -7,7 +7,7 @@
   "miniapp": {
     "version": "1",
     "name": "FateFi",
-    "subtitle": "Tarot-Powered Market Predictions",
+    "subtitle": "Tarot market signals",
     "description": "Draw the cards. Read the cosmos. Predict the market. A mystical, gamified prediction platform powered by AI and ancient wisdom.",
     "homeUrl": "https://fatefi.fun",
     "iconUrl": "https://fatefi.fun/icon.png",
@@ -21,7 +21,7 @@
     "tags": ["tarot", "predictions", "defi", "base", "onchain"],
     "heroImageUrl": "https://fatefi.fun/og-image.png",
     "tagline": "Let the cards guide your trade",
-    "ogTitle": "FateFi — Tarot-Powered Market Predictions",
+    "ogTitle": "FateFi Tarot Signals",
     "ogDescription": "Draw the cards. Read the cosmos. Predict the market.",
     "ogImageUrl": "https://fatefi.fun/og-image.png"
   }
