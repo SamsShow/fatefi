@@ -185,14 +185,35 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* Mobile: Hamburger only */}
-                    <button
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-white/5 transition-colors"
-                        aria-label="Toggle menu"
-                    >
-                        {menuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
+                    {/* Mobile: Wallet + Hamburger */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {connected && wallet ? (
+                            <button
+                                onClick={handleDisconnect}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-accent-gold"
+                                aria-label="Disconnect wallet"
+                            >
+                                <Wallet size={12} />
+                                {shortenAddress(wallet)}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleConnect}
+                                disabled={connecting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-purple text-white text-xs font-semibold disabled:opacity-50"
+                            >
+                                <Wallet size={12} />
+                                {connecting ? 'Connecting...' : 'Connect'}
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            className="p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-white/5 transition-colors"
+                            aria-label="Toggle menu"
+                        >
+                            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -244,33 +265,6 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        {/* Wallet */}
-                        <div className="pt-4 mt-4 border-t border-white/10">
-                            {connected && wallet ? (
-                                <div className="flex flex-col gap-2">
-                                    <div className="glass-card px-4 py-3 text-sm font-mono text-accent-gold flex items-center gap-2">
-                                        <Wallet size={16} />
-                                        {shortenAddress(wallet)}
-                                    </div>
-                                    <button
-                                        onClick={() => { handleDisconnect(); closeMenu(); }}
-                                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-foreground/60 hover:text-accent-red hover:bg-accent-red/10 transition-colors"
-                                    >
-                                        <LogOut size={16} />
-                                        Disconnect
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={async () => { await handleConnect(); closeMenu(); }}
-                                    disabled={connecting}
-                                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-accent-purple text-white font-semibold transition-colors disabled:opacity-50"
-                                >
-                                    <Wallet size={16} />
-                                    {connecting ? 'Connecting...' : 'Connect Wallet'}
-                                </button>
-                            )}
-                        </div>
                     </div>
                 </div>
             )}
