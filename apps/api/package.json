@@ -3,7 +3,9 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
+        "predev": "pnpm rebuild better-sqlite3",
         "dev": "tsx watch src/index.ts",
+        "postinstall": "pnpm rebuild better-sqlite3",
         "build": "tsc",
         "start": "node dist/index.js"
     },
