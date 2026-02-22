@@ -1,11 +1,32 @@
 import { Wallet, getBytes, id } from 'ethers';
-import { Client, IdentifierKind, type Identifier, type Signer } from '@xmtp/node-sdk';
 import { FULL_DECK, drawCardForDate } from '../tarot/deck.js';
 import { getDb } from '../db/schema.js';
 
 type Orientation = ReturnType<typeof drawCardForDate>['orientation'];
 
-let xmtpClientPromise: Promise<Client> | null = null;
+type XmtpIdentifier = { identifier: string; identifierKind: unknown };
+type XmtpSigner = {
+    type: 'EOA';
+    getIdentifier: () => XmtpIdentifier;
+    signMessage: (message: string) => Promise<Uint8Array>;
+};
+type XmtpClientLike = {
+    fetchInboxIdByIdentifier: (identifier: XmtpIdentifier) => Promise<string | null>;
+    conversations: {
+        createDmWithIdentifier: (identifier: XmtpIdentifier) => Promise<{ sendText: (message: string) => Promise<unknown> }>;
+    };
+};
+type XmtpSdkLike = {
+    Client: {
+        create: (signer: XmtpSigner, options: Record<string, unknown>) => Promise<XmtpClientLike>;
+    };
+    IdentifierKind: {
+        Ethereum: unknown;
+    };
+};
+
+let xmtpClientPromise: Promise<XmtpClientLike> | null = null;
+let xmtpSdkPromise: Promise<XmtpSdkLike> | null = null;
 
 const MAJOR_ARCANA_MAP: Record<string, number> = {
     'The Fool': 0,
@@ -48,19 +69,27 @@ function getDbEncryptionKey(): Uint8Array {
     return getBytes(id(privateKey));
 }
 
-function buildSigner(): Signer {
+async function getXmtpSdk(): Promise<XmtpSdkLike> {
+    if (!xmtpSdkPromise) {
+        xmtpSdkPromise = import('@xmtp/node-sdk') as Promise<XmtpSdkLike>;
+    }
+    return xmtpSdkPromise;
+}
+
+async function buildSigner(): Promise<XmtpSigner> {
     const privateKey = process.env.XMTP_BROADCASTER_PRIVATE_KEY;
     if (!privateKey) {
         throw new Error('XMTP_BROADCASTER_PRIVATE_KEY is missing');
     }
 
+    const sdk = await getXmtpSdk();
     const wallet = new Wallet(privateKey);
 
     return {
         type: 'EOA',
         getIdentifier: () => ({
             identifier: wallet.address,
-            identifierKind: IdentifierKind.Ethereum,
+            identifierKind: sdk.IdentifierKind.Ethereum,
         }),
         signMessage: async (message: string) => {
             const signatureHex = await wallet.signMessage(message);
@@ -69,9 +98,11 @@ function buildSigner(): Signer {
     };
 }
 
-async function getXmtpClient(): Promise<Client> {
+async function getXmtpClient(): Promise<XmtpClientLike> {
     if (!xmtpClientPromise) {
-        xmtpClientPromise = Client.create(buildSigner(), {
+        const sdk = await getXmtpSdk();
+        const signer = await buildSigner();
+        xmtpClientPromise = sdk.Client.create(signer, {
             env: (process.env.XMTP_ENV as 'local' | 'dev' | 'production' | undefined) || 'dev',
             dbEncryptionKey: getDbEncryptionKey(),
             dbPath: process.env.XMTP_DB_PATH || './xmtp-broadcaster.db3',
@@ -129,15 +160,16 @@ function buildBroadcastMessage(date: string, cardName: string, orientation: Orie
     ].join('\n');
 }
 
-function toIdentifier(walletAddress: string): Identifier {
+async function toIdentifier(walletAddress: string): Promise<XmtpIdentifier> {
+    const sdk = await getXmtpSdk();
     return {
         identifier: walletAddress.toLowerCase(),
-        identifierKind: IdentifierKind.Ethereum,
+        identifierKind: sdk.IdentifierKind.Ethereum,
     };
 }
 
-async function ensureInboxExists(client: Client, walletAddress: string): Promise<string> {
-    const identifier = toIdentifier(walletAddress);
+async function ensureInboxExists(client: XmtpClientLike, walletAddress: string): Promise<string> {
+    const identifier = await toIdentifier(walletAddress);
     const inboxId = await client.fetchInboxIdByIdentifier(identifier);
     if (!inboxId) {
         const env = process.env.XMTP_ENV || 'dev';
@@ -196,7 +228,7 @@ export async function broadcastDailyDraw(params: {
     for (const subscriber of subscribers) {
         try {
             await ensureInboxExists(client, subscriber.wallet_address);
-            const dm = await client.conversations.createDmWithIdentifier(toIdentifier(subscriber.wallet_address));
+            const dm = await client.conversations.createDmWithIdentifier(await toIdentifier(subscriber.wallet_address));
             await dm.sendText(message);
             logMessageForPreview({
                 walletAddress: subscriber.wallet_address,
