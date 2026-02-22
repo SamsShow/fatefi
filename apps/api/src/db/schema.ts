@@ -70,5 +70,24 @@ function initSchema() {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS xmtp_subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      wallet_address TEXT UNIQUE NOT NULL,
+      subscribed INTEGER NOT NULL DEFAULT 1,
+      subscribed_at TEXT DEFAULT (datetime('now')),
+      unsubscribed_at TEXT,
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS xmtp_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      wallet_address TEXT NOT NULL,
+      card_name TEXT NOT NULL,
+      orientation TEXT NOT NULL CHECK (orientation IN ('upright', 'reversed')),
+      date TEXT NOT NULL,
+      message_text TEXT NOT NULL,
+      sent_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 }

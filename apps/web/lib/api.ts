@@ -89,3 +89,31 @@ export async function getYesterdayResult() {
 export async function getPoolStats() {
     return request<any>('/market/pool');
 }
+
+// ─── XMTP ────────────────────────────────────────────────
+export async function getXmtpSubscriptionStatus() {
+    return request<{ subscribed: boolean }>('/xmtp/status');
+}
+
+export async function subscribeXmtp() {
+    return request<{ subscribed: boolean }>('/xmtp/subscribe', {
+        method: 'POST',
+    });
+}
+
+export async function unsubscribeXmtp() {
+    return request<{ subscribed: boolean }>('/xmtp/unsubscribe', {
+        method: 'POST',
+    });
+}
+
+export async function getXmtpInboxPreview() {
+    return request<Array<{
+        id: number;
+        card_name: string;
+        orientation: 'upright' | 'reversed';
+        date: string;
+        message_text: string;
+        sent_at: string;
+    }>>('/xmtp/inbox-preview');
+}

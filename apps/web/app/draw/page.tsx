@@ -8,6 +8,7 @@ import EthPriceTicker from '@/components/EthPriceTicker';
 import YesterdayResult from '@/components/YesterdayResult';
 import PoolStats from '@/components/PoolStats';
 import ElsaPortfolio from '@/components/ElsaPortfolio';
+import XmtpSubscribeButton from '@/components/XmtpSubscribeButton';
 import { getTodayDraw, getTodayPrediction } from '@/lib/api';
 import { isConnected } from '@/lib/wallet';
 
@@ -135,6 +136,9 @@ export default function DrawPage() {
                             DAILY TAROT · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                         </div>
                         <h1 className="text-3xl md:text-4xl font-bold gradient-text">Today&apos;s Reading</h1>
+                        <div className="mt-4 flex justify-center">
+                            <XmtpSubscribeButton />
+                        </div>
                     </div>
 
                     {loading ? (

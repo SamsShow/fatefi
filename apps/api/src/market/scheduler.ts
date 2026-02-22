@@ -2,6 +2,7 @@ import { recordPrice, getISTTime, getYesterdayIST, getISTDate } from './ethPrice
 import { resolveDay } from './resolver.js';
 import { getDb } from '../db/schema.js';
 import { drawCardForDate } from '../tarot/deck.js';
+import { broadcastDailyDraw } from '../xmtp/service.js';
 
 const PRICE_INTERVAL_MS = 5 * 60 * 1000;  // 5 minutes
 const CHECK_INTERVAL_MS = 60 * 1000;       // 1 minute
@@ -118,6 +119,11 @@ function createNewDayCard(date: string) {
             .run(card.name, orientation, date);
 
         console.log(`[Scheduler] New card for ${date}: ${card.name} (${orientation})`);
+        void broadcastDailyDraw({
+            date,
+            cardName: card.name,
+            orientation,
+        });
     } catch (err: any) {
         console.error(`[Scheduler] Failed to create new day card:`, err.message);
     }

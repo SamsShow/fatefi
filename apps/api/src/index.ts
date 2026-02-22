@@ -6,11 +6,12 @@ import authRoutes from './auth/routes.js';
 import predictionRoutes from './predictions/routes.js';
 import leaderboardRoutes from './leaderboard/routes.js';
 import marketRoutes from './market/routes.js';
+import xmtpRoutes from './xmtp/routes.js';
 import { startScheduler } from './market/scheduler.js';
 import { isNeonMarketStoreEnabled } from './market/neonStore.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT || 3001);
 
 // ─── Middleware ──────────────────────────────────────────
 const corsOrigins = [
@@ -51,6 +52,7 @@ app.use('/api/tarot', tarotRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/xmtp', xmtpRoutes);
 
 // ─── Start ──────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
