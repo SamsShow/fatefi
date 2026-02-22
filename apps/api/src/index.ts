@@ -53,7 +53,7 @@ app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/market', marketRoutes);
 
 // ─── Start ──────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🔮 FateFi API running on http://localhost:${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
     console.log(`   Tarot:  http://localhost:${PORT}/api/tarot/today`);
