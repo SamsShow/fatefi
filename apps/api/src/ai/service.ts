@@ -1,7 +1,26 @@
 import type { AIInterpretation, Orientation } from '@fatefi/shared-types';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const OPENCLAW_URL = process.env.OPENCLAW_URL || 'http://127.0.0.1:18789';
 const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN || '';
+const OPENCLAW_AGENT_ID = process.env.OPENCLAW_AGENT_ID || 'main';
+const execFileAsync = promisify(execFile);
+
+const ORACLE_SYSTEM_PROMPT = `You are FateFi's mystical AI oracle — a dramatic, crypto-native fortune teller channeling ancient tarot wisdom into modern market vibes.
+
+Your interpretations should be RICH, DETAILED, and ENTERTAINING. Write like a mystical degen sage who reads the blockchain in the stars.
+
+Rules:
+- prediction: 2-3 sentences. Bold, dramatic market direction call with cosmic flair.
+- narrative: 4-6 sentences. Tell a mystical story weaving tarot symbolism with crypto culture. Reference diamond hands, rug pulls, moon missions, whale movements, support/resistance, candlestick patterns — make it fun!
+- confidence_tone: A short fun tagline with emojis (e.g. "Cosmically Bullish 🌕🚀" or "Mystically Uncertain 🌫️🎭")
+- market_mood: 1-2 sentences describing the overall vibe/sentiment the card suggests.
+- key_levels: A short note about what to watch for (support, resistance, volatility zones) — keep it mystical.
+- cosmic_tip: 1-2 sentences of actionable cosmic wisdom with an emoji. Fun and memorable.
+- disclaimer: Always state this is entertainment only, not financial advice.
+
+Respond in valid JSON with keys: prediction, narrative, confidence_tone, market_mood, key_levels, cosmic_tip, disclaimer.`;
 
 // ─── Fallback interpretations when OpenClaw is unavailable ───
 const FALLBACK_INTERPRETATIONS: Record<string, AIInterpretation> = {
@@ -37,73 +56,104 @@ export async function getInterpretation(
     try {
         const prompt = buildPrompt(cardName, orientation, marketContext);
 
-        const response = await fetch(`${OPENCLAW_URL}/v1/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(OPENCLAW_TOKEN ? { Authorization: `Bearer ${OPENCLAW_TOKEN}` } : {}),
-            },
-            body: JSON.stringify({
-                model: 'default',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are FateFi's mystical AI oracle — a dramatic, crypto-native fortune teller channeling ancient tarot wisdom into modern market vibes.
+        const endpointCandidates = [
+            `${OPENCLAW_URL.replace(/\/$/, '')}/v1/chat/completions`,
+            `${OPENCLAW_URL.replace(/\/$/, '')}/chat/completions`,
+        ];
 
-Your interpretations should be RICH, DETAILED, and ENTERTAINING. Write like a mystical degen sage who reads the blockchain in the stars.
+        let response: Response | null = null;
+        let lastError = '';
 
-Rules:
-- prediction: 2-3 sentences. Bold, dramatic market direction call with cosmic flair.
-- narrative: 4-6 sentences. Tell a mystical story weaving tarot symbolism with crypto culture. Reference diamond hands, rug pulls, moon missions, whale movements, support/resistance, candlestick patterns — make it fun!
-- confidence_tone: A short fun tagline with emojis (e.g. "Cosmically Bullish 🌕🚀" or "Mystically Uncertain 🌫️🎭")
-- market_mood: 1-2 sentences describing the overall vibe/sentiment the card suggests.
-- key_levels: A short note about what to watch for (support, resistance, volatility zones) — keep it mystical.
-- cosmic_tip: 1-2 sentences of actionable cosmic wisdom with an emoji. Fun and memorable.
-- disclaimer: Always state this is entertainment only, not financial advice.
+        for (const endpoint of endpointCandidates) {
+            const candidate = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(OPENCLAW_TOKEN ? { Authorization: `Bearer ${OPENCLAW_TOKEN}` } : {}),
+                },
+                body: JSON.stringify({
+                    model: 'default',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: ORACLE_SYSTEM_PROMPT,
+                        },
+                        { role: 'user', content: prompt },
+                    ],
+                    temperature: 0.9,
+                    max_tokens: 800,
+                }),
+                signal: AbortSignal.timeout(15000),
+            });
 
-Respond in valid JSON with keys: prediction, narrative, confidence_tone, market_mood, key_levels, cosmic_tip, disclaimer.`,
-                    },
-                    { role: 'user', content: prompt },
-                ],
-                temperature: 0.9,
-                max_tokens: 800,
-            }),
-            signal: AbortSignal.timeout(15000),
-        });
+            if (candidate.ok) {
+                response = candidate;
+                break;
+            }
 
-        if (!response.ok) {
-            throw new Error(`OpenClaw returned ${response.status}`);
+            lastError = `OpenClaw endpoint ${endpoint} returned ${candidate.status}`;
+            if (candidate.status !== 404 && candidate.status !== 405) {
+                response = candidate;
+                break;
+            }
+        }
+
+        if (!response || !response.ok) {
+            const cliContent = await runOpenClawCli(prompt, lastError || `OpenClaw returned ${response?.status ?? 'unknown error'}`);
+            return parseInterpretation(cliContent);
         }
 
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content || '';
-
-        // Try to parse JSON from the response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            return {
-                prediction: parsed.prediction || 'The stars are unclear...',
-                narrative: parsed.narrative || 'The cosmic energies swirl with possibility.',
-                confidence_tone: parsed.confidence_tone || 'Mystical 🔮',
-                market_mood: parsed.market_mood || null,
-                key_levels: parsed.key_levels || null,
-                cosmic_tip: parsed.cosmic_tip || null,
-                disclaimer: parsed.disclaimer || '🃏 Entertainment only. Not financial advice.',
-            };
-        }
-
-        // If we can't parse JSON, wrap the raw text
-        return {
-            prediction: content.slice(0, 200),
-            narrative: content,
-            confidence_tone: 'Mystical 🔮',
-            disclaimer: '⚠️ Entertainment only. Not financial advice.',
-        };
+        return parseInterpretation(content);
     } catch (err) {
         console.warn('OpenClaw unavailable, using fallback interpretation:', (err as Error).message);
         return FALLBACK_INTERPRETATIONS[`default_${orientation}`] || FALLBACK_INTERPRETATIONS.default_upright;
     }
+}
+
+async function runOpenClawCli(prompt: string, previousError: string): Promise<string> {
+    const message = `${ORACLE_SYSTEM_PROMPT}\n\n${prompt}`;
+
+    try {
+        const { stdout } = await execFileAsync(
+            'openclaw',
+            ['agent', '--local', '--agent', OPENCLAW_AGENT_ID, '--json', '--message', message],
+            { timeout: 30000, maxBuffer: 1024 * 1024 * 8 }
+        );
+
+        const parsed = JSON.parse(stdout);
+        const text = parsed?.payloads?.[0]?.text;
+        if (!text || typeof text !== 'string') {
+            throw new Error('OpenClaw CLI returned no text payload');
+        }
+        return text;
+    } catch (error) {
+        throw new Error(`${previousError}; OpenClaw CLI fallback failed: ${(error as Error).message}`);
+    }
+}
+
+function parseInterpretation(content: string): AIInterpretation {
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+            prediction: parsed.prediction || 'The stars are unclear...',
+            narrative: parsed.narrative || 'The cosmic energies swirl with possibility.',
+            confidence_tone: parsed.confidence_tone || 'Mystical 🔮',
+            market_mood: parsed.market_mood || null,
+            key_levels: parsed.key_levels || null,
+            cosmic_tip: parsed.cosmic_tip || null,
+            disclaimer: parsed.disclaimer || '🃏 Entertainment only. Not financial advice.',
+        };
+    }
+
+    return {
+        prediction: content.slice(0, 200),
+        narrative: content,
+        confidence_tone: 'Mystical 🔮',
+        disclaimer: '⚠️ Entertainment only. Not financial advice.',
+    };
 }
 
 function buildPrompt(cardName: string, orientation: Orientation, marketContext?: string): string {
