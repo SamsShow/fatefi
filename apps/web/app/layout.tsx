@@ -3,6 +3,7 @@ import { Inter, Crimson_Text } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import StarField from "@/components/StarField";
+import MiniAppProvider from "@/components/MiniAppProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,6 +16,8 @@ const crimson = Crimson_Text({
   weight: ["400", "600", "700"],
 });
 
+const ROOT_URL = "https://fatefi.fun";
+
 export const metadata: Metadata = {
   title: "FateFi — Tarot-Powered Market Predictions",
   description: "Draw the cards. Read the cosmos. Predict the market. A mystical, gamified prediction platform powered by AI and ancient wisdom. Entertainment only.",
@@ -22,6 +25,21 @@ export const metadata: Metadata = {
     icon: "/icon.png",
     shortcut: "/icon.png",
     apple: "/icon.png",
+  },
+  // Base Mini App embed metadata — required for rich link previews in the Base app
+  other: {
+    "fc:miniapp": JSON.stringify({
+      version: "next",
+      imageUrl: `${ROOT_URL}/og-image.png`,
+      button: {
+        title: "Draw Your Cards",
+        action: {
+          type: "launch_miniapp",
+          name: "FateFi",
+          url: ROOT_URL,
+        },
+      },
+    }),
   },
 };
 
@@ -33,6 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${crimson.variable} antialiased`}>
+        <MiniAppProvider />
         <StarField />
         <Navbar />
         <main className="pt-20 min-h-screen relative z-10">

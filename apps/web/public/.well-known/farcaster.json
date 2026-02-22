@@ -1,0 +1,29 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "FateFi",
+    "subtitle": "Tarot-Powered Market Predictions",
+    "description": "Draw the cards. Read the cosmos. Predict the market. A mystical, gamified prediction platform powered by AI and ancient wisdom.",
+    "homeUrl": "https://fatefi.fun",
+    "iconUrl": "https://fatefi.fun/icon.png",
+    "splashImageUrl": "https://fatefi.fun/og-image.png",
+    "splashBackgroundColor": "#0a0a0f",
+    "webhookUrl": "https://fatefi.fun/api/webhook",
+    "screenshotUrls": [
+      "https://fatefi.fun/screenshot-1.png",
+      "https://fatefi.fun/screenshot-2.png"
+    ],
+    "primaryCategory": "social",
+    "tags": ["tarot", "predictions", "defi", "base", "onchain"],
+    "heroImageUrl": "https://fatefi.fun/og-image.png",
+    "tagline": "Let the cards guide your trade",
+    "ogTitle": "FateFi — Tarot-Powered Market Predictions",
+    "ogDescription": "Draw the cards. Read the cosmos. Predict the market.",
+    "ogImageUrl": "https://fatefi.fun/og-image.png"
+  }
+}
