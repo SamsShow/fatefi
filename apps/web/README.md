@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Set your Reown project ID before starting the app:
+
+```bash
+export NEXT_PUBLIC_REOWN_PROJECT_ID=your_reown_project_id
+```
+
 First, run the development server:
 
 ```bash

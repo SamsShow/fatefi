@@ -5,11 +5,16 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Moon, Trophy, ScrollText, Wallet, LogOut, Coins, ExternalLink, Menu, X } from 'lucide-react';
-import { signInWithWallet, disconnect, getStoredWallet, isConnected, shortenAddress } from '@/lib/wallet';
+import { useAppKit, useAppKitAccount, useDisconnect } from '@reown/appkit/react';
+import { signInWithWallet, disconnect as clearAuth, getStoredWallet, isConnected, shortenAddress } from '@/lib/wallet';
+import { projectId } from '@/lib/reown';
 import { getSelectedNetwork, setSelectedNetwork, type UserNetwork } from '@/lib/staking';
 
 export default function Navbar() {
     const pathname = usePathname();
+    const { open } = useAppKit();
+    const { address: connectedAddress, isConnected: walletConnected } = useAppKitAccount({ namespace: 'eip155' });
+    const { disconnect: disconnectWallet } = useDisconnect();
     const [wallet, setWallet] = useState<string | null>(null);
     const [connected, setConnected] = useState(false);
     const [connecting, setConnecting] = useState(false);
@@ -26,12 +31,50 @@ export default function Navbar() {
         return () => window.removeEventListener('fatefi-network-changed', syncNetwork);
     }, []);
 
+    useEffect(() => {
+        if (!walletConnected && connected) {
+            clearAuth();
+            setConnected(false);
+            setWallet(null);
+        }
+    }, [walletConnected, connected]);
+
+    useEffect(() => {
+        if (!walletConnected || !connectedAddress || connected || connecting) {
+            return;
+        }
+
+        const run = async () => {
+            try {
+                setConnecting(true);
+                const { user } = await signInWithWallet();
+                setWallet(user.wallet_address || connectedAddress);
+                setConnected(true);
+            } catch (err: any) {
+                alert(err?.message || 'Failed to sign in with wallet');
+            } finally {
+                setConnecting(false);
+            }
+        };
+
+        void run();
+    }, [walletConnected, connectedAddress, connected, connecting]);
+
     const switchNetwork = (next: UserNetwork) => {
         setSelectedNetwork(next);
         setNetwork(next);
     };
 
     const handleConnect = async () => {
+        if (!walletConnected) {
+            if (!projectId) {
+                alert('Missing NEXT_PUBLIC_REOWN_PROJECT_ID. Add it to enable wallet connection.');
+                return;
+            }
+            await open({ view: 'Connect', namespace: 'eip155' });
+            return;
+        }
+
         try {
             setConnecting(true);
             const { user } = await signInWithWallet();
@@ -44,8 +87,9 @@ export default function Navbar() {
         }
     };
 
-    const handleDisconnect = () => {
-        disconnect();
+    const handleDisconnect = async () => {
+        await disconnectWallet({ namespace: 'eip155' });
+        clearAuth();
         setWallet(null);
         setConnected(false);
     };

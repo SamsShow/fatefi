@@ -1,28 +1,28 @@
-import { BrowserProvider } from 'ethers';
+import { getAccount, getWalletClient } from '@wagmi/core';
 import { getNonce, verifySignature } from './api';
-
-declare global {
-    interface Window {
-        ethereum?: any;
-    }
-}
+import { wagmiConfig } from './reown';
 
 export async function connectWallet(): Promise<string> {
-    if (!window.ethereum) {
-        throw new Error('No wallet detected. Please install MetaMask.');
+    const account = getAccount(wagmiConfig);
+    if (!account.address) {
+        throw new Error('No wallet connected. Use Connect Wallet first.');
     }
-    const provider = new BrowserProvider(window.ethereum);
-    const accounts = await provider.send('eth_requestAccounts', []);
-    return accounts[0];
+    return account.address;
 }
 
 export async function signInWithWallet(): Promise<{ token: string; user: any }> {
-    const address = await connectWallet();
+    const walletClient = await getWalletClient(wagmiConfig);
+    if (!walletClient?.account?.address) {
+        throw new Error('Wallet is not connected. Connect wallet first.');
+    }
+
+    const address = walletClient.account.address;
     const { message } = await getNonce(address);
 
-    const provider = new BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const signature = await signer.signMessage(message);
+    const signature = await walletClient.signMessage({
+        account: walletClient.account,
+        message,
+    });
 
     const result = await verifySignature(address, signature);
 

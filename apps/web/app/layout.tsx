@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import StarField from "@/components/StarField";
 import MiniAppProvider from "@/components/MiniAppProvider";
+import ReownProvider from "@/components/ReownProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -55,16 +56,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${crimson.variable} antialiased`}>
-        <MiniAppProvider />
-        <StarField />
-        <Navbar />
-        <main className="pt-20 min-h-screen relative z-10">
-          {children}
-        </main>
-        {/* Global disclaimer */}
-        <footer className="relative z-10 text-center py-4 text-foreground/30 text-xs border-t border-white/5">
-          ⚠️ FateFi is entertainment only. Not financial advice. All predictions are symbolic and random.
-        </footer>
+        <ReownProvider>
+          <MiniAppProvider />
+          <StarField />
+          <Navbar />
+          <main className="pt-20 min-h-screen relative z-10">
+            {children}
+          </main>
+          {/* Global disclaimer */}
+          <footer className="relative z-10 text-center py-4 text-foreground/30 text-xs border-t border-white/5">
+            ⚠️ FateFi is entertainment only. Not financial advice. All predictions are symbolic and random.
+          </footer>
+        </ReownProvider>
       </body>
     </html>
   );
