@@ -15,8 +15,7 @@
     "splashBackgroundColor": "#0a0a0f",
     "webhookUrl": "https://fatefi.fun/api/webhook",
     "screenshotUrls": [
-      "https://fatefi.fun/screenshot-1.png",
-      "https://fatefi.fun/screenshot-2.png"
+      "https://fatefi.fun/og-image.png"
     ],
     "primaryCategory": "social",
     "tags": ["tarot", "predictions", "defi", "base", "onchain"],
