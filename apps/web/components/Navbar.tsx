@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Moon, Trophy, ScrollText, Wallet, LogOut, Coins, ExternalLink, Menu, X } from 'lucide-react';
+import { Moon, Trophy, ScrollText, Wallet, LogOut, Coins, ExternalLink, Menu, X, Bot } from 'lucide-react';
 import { useAppKit, useAppKitAccount, useDisconnect } from '@reown/appkit/react';
 import { signInWithWallet, disconnect as clearAuth, getStoredWallet, isConnected, shortenAddress } from '@/lib/wallet';
 import { projectId } from '@/lib/reown';
@@ -99,6 +99,7 @@ export default function Navbar() {
         { href: '/draw', label: 'Daily Draw', icon: <Moon size={14} /> },
         { href: '/leaderboard', label: 'Leaderboard', icon: <Trophy size={14} /> },
         { href: '/history', label: 'History', icon: <ScrollText size={14} /> },
+        { href: '/bankr', label: 'Bankr', icon: <Bot size={14} /> },
     ];
 
     const closeMenu = () => setMenuOpen(false);

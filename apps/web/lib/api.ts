@@ -117,3 +117,46 @@ export async function getXmtpInboxPreview() {
         sent_at: string;
     }>>('/xmtp/inbox-preview');
 }
+
+// ─── Bankr ───────────────────────────────────────────────
+export async function bankrChat(message: string) {
+    return request<{ response: string; jobId: string; status: string }>('/bankr/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+    });
+}
+
+export async function bankrSwap(prompt: string) {
+    return request<{
+        status: 'completed' | 'failed' | 'cancelled' | 'timeout';
+        response: string;
+        jobId: string;
+        transactions: Array<{
+            type: string;
+            metadata: {
+                chainId?: number;
+                to?: string;
+                data?: string;
+                value?: string;
+                gas?: string;
+                gasPrice?: string;
+                transaction?: {
+                    chainId?: number;
+                    to?: string;
+                    data?: string;
+                    value?: string;
+                    gas?: string;
+                    gasPrice?: string;
+                };
+                [key: string]: any;
+            };
+        }>;
+    }>('/bankr/swap', {
+        method: 'POST',
+        body: JSON.stringify({ prompt }),
+    });
+}
+
+export async function bankrAgentInfo() {
+    return request<any>('/bankr/agent');
+}

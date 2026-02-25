@@ -7,6 +7,7 @@ import predictionRoutes from './predictions/routes.js';
 import leaderboardRoutes from './leaderboard/routes.js';
 import marketRoutes from './market/routes.js';
 import xmtpRoutes from './xmtp/routes.js';
+import bankrRoutes from './bankr/routes.js';
 import { startScheduler } from './market/scheduler.js';
 import { isNeonMarketStoreEnabled } from './market/neonStore.js';
 
@@ -53,6 +54,7 @@ app.use('/api/predictions', predictionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/xmtp', xmtpRoutes);
+app.use('/api/bankr', bankrRoutes);
 
 // ─── Start ──────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
